@@ -39,11 +39,14 @@ float c3 = 2.019202697e-07;
 // change this to fit the number of steps per revolution
 const int stepsPerRevolution = 200;  
 
+int a = 0;
 
 
 // number of steps the motor has taken
 int stepCount = 0;        
 
+//connect pin 4 to enable
+int stepStart = 4;
 //connect pin 7 to step
 int stepGo = 7;  
 // connect pin 8 to direction
@@ -54,8 +57,10 @@ bool changeDirection;
 // the setup routine runs once when you press reset:
 void setup() 
 {
+  //pinMode(stepStart,OUTPUT);
   pinMode(stepGo, OUTPUT);
   pinMode(stepDirection, OUTPUT);   
+  
 
   changeDirection = false; //stepper will start going clockwise
   
@@ -66,10 +71,17 @@ void setup()
 
 void loop() 
 {
-  tempatureDriver();//updates changeDirection accordingly based on temapture 
-  updateStepperMotor(changeDirection); // tells stepperMotor what to do
   //testStepperMotor(); // test the stepper motor by making it rotate in both directions
-  //readTempature(); // read tempatures from the thermistor
+  readTempature(); // read tempatures from the thermistor
+ // tempatureDriver();//updates changeDirection accordingly based on temapture 
+
+  
+ /* Currently the stepper motor doesnt work with the BioHack board     
+  *  updateStepperMotor(changeDirection) is called after tempatureDriver
+  *  function updates change direction accordingly                        
+  */
+   //updateStepperMotor(changeDirection); // tells stepperMotor what to do
+  
 }
 /*
  * Goes up to 195 degrees in boiling in water
@@ -109,21 +121,25 @@ void readTempature()
 /**************************************************************/
 void tempatureDriver()
 {
-   if(tempature > 0 && tempature < 75)
+   Serial.println(tempature);
+   if(tempature < 100)
    {
      changeDirection = true; // stepper motor will go clockwise
+     Serial.println("going clockwise");
    }
 
-   else if(tempature > 75)
+   else if(tempature > 100)
    {
       changeDirection = false; // stepper motor will go counter clockwise
+      Serial.println("going counter clockwise");
    }
 }
 /********************************************************/
-/* sends data to stepper motor, either to turn or start */
+/* sends a bool to tell stepper motor to turn right or left*/
 /*******************************************************/
 void updateStepperMotor(bool isRight)
 {
+   /** tell stepper to go clockwise **/
    if(isRight == true)
    {
        digitalWrite(stepDirection,LOW); 
@@ -134,13 +150,15 @@ void updateStepperMotor(bool isRight)
        delay(10);
    }
 
+   /* counter clocker wise **/
    else if(isRight == false)
    {
      digitalWrite(stepDirection,HIGH);
      delay(10);
      digitalWrite(stepGo,HIGH);
      delay(10);
-     digitalWrite(stepGo,LOW); 
+     digitalWrite(stepGo,LOW);
+     delay(10); 
    }
    
 }
@@ -167,11 +185,8 @@ void testStepperMotor()
 
     stepCount++;
 }
-
-
-   
-
-
+/**************************************************/
+/**************************************************/
   
    
 
